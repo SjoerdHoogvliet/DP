@@ -1,5 +1,6 @@
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.sql.*;
 
@@ -15,11 +16,11 @@ public class ReizigerDAOPsql implements ReizigerDAO{
             pst.setString(2, reiziger.getVoorletters());
             pst.setString(3, reiziger.getTussenvoegsel());
             pst.setString(4, reiziger.getAchternaam());
-            pst.setString(5, reiziger.getGeboortedatum().toString());
-            pst.executeQuery();
+            pst.setDate(5, reiziger.getGeboortedatum());
+            pst.execute();
             return true;
         }catch(SQLException sqle){
-            System.err.println("[SQLException] Something went wrong with the SQL: " + sqle.getMessage());
+            System.err.println("[SQLException] Something went wrong with the SQL at save: " + sqle.getMessage());
             return false;
         }
     }
@@ -33,9 +34,9 @@ public class ReizigerDAOPsql implements ReizigerDAO{
             pst.setString(1, reiziger.getVoorletters());
             pst.setString(2, reiziger.getTussenvoegsel());
             pst.setString(3, reiziger.getAchternaam());
-            pst.setString(4, reiziger.getGeboortedatum().toString());
+            pst.setDate(4, reiziger.getGeboortedatum());
             pst.setInt(5,reiziger.getId());
-            pst.executeQuery();
+            pst.execute();
             return true;
         }catch(SQLException sqle){
             System.err.println("[SQLException] Something went wrong with the SQL: " + sqle.getMessage());
@@ -46,11 +47,11 @@ public class ReizigerDAOPsql implements ReizigerDAO{
     @Override
     public boolean delete(Reiziger reiziger) {
         try{
-            String query = "DELETE reiziger WHERE reiziger_id=?";
+            String query = "DELETE FROM reiziger WHERE reiziger_id=?";
 
             PreparedStatement pst = Main.connection.prepareStatement(query);
             pst.setInt(1,reiziger.getId());
-            pst.executeQuery();
+            pst.execute();
             return true;
         }catch(SQLException sqle){
             System.err.println("[SQLException] Something went wrong with the SQL: " + sqle.getMessage());
@@ -60,16 +61,82 @@ public class ReizigerDAOPsql implements ReizigerDAO{
 
     @Override
     public Reiziger findById(int id) {
-        return null;
+        try{
+            String query = "SELECT * FROM reiziger WHERE reiziger_id=?";
+
+            PreparedStatement pst = Main.connection.prepareStatement(query);
+            pst.setInt(1, id);
+            ResultSet rs = pst.executeQuery();
+
+            String voorletters = null;
+            String tussenvoegsel = null;
+            String achternaam = null;
+            Date geboortedatum = null;
+            while(rs.next()){
+                voorletters = rs.getString("voorletters");
+                tussenvoegsel = rs.getString("tussenvoegsel");
+                achternaam = rs.getString("achternaam");
+                geboortedatum = rs.getDate("geboortedatum");
+            }
+
+            Reiziger r = new Reiziger(id, voorletters, tussenvoegsel, achternaam, geboortedatum);
+            return r;
+        }catch(SQLException sqle){
+            System.err.println("[SQLException] Something went wrong with the SQL: " + sqle.getMessage());
+            return null;
+        }
     }
 
     @Override
     public List<Reiziger> findByGbdatum(String datum) {
-        return null;
+        List<Reiziger> reizigerList = new ArrayList<>();
+        try{
+            String query = "SELECT * FROM reiziger WHERE geboortedatum=?";
+
+            PreparedStatement pst = Main.connection.prepareStatement(query);
+            pst.setDate(1, Date.valueOf(datum));
+            ResultSet rs = pst.executeQuery();
+
+            while(rs.next()){
+                int id = rs.getInt("reiziger_id");
+                String voorletters = rs.getString("voorletters");
+                String tussenvoegsel = rs.getString("tussenvoegsel");
+                String achternaam = rs.getString("achternaam");
+                Reiziger r = new Reiziger(id, voorletters, tussenvoegsel, achternaam, Date.valueOf(datum));
+                reizigerList.add(r);
+            }
+
+            return reizigerList;
+        }catch(SQLException sqle){
+            System.err.println("[SQLException] Something went wrong with the SQL: " + sqle.getMessage());
+            return reizigerList;
+        }
     }
 
     @Override
     public List<Reiziger> findAll() {
-        return null;
+        List<Reiziger> reizigerList = new ArrayList<>();
+        try{
+            String query = "SELECT * FROM reiziger";
+
+            PreparedStatement pst = Main.connection.prepareStatement(query);
+            ResultSet rs = pst.executeQuery();
+
+            while(rs.next()){
+                int id = rs.getInt("reiziger_id");
+                String voorletters = rs.getString("voorletters");
+                String tussenvoegsel = rs.getString("tussenvoegsel");
+                String achternaam = rs.getString("achternaam");
+                Date geboortedatum = rs.getDate("geboortedatum");
+
+                Reiziger r = new Reiziger(id, voorletters, tussenvoegsel, achternaam, geboortedatum);
+                reizigerList.add(r);
+            }
+
+            return reizigerList;
+        }catch(SQLException sqle){
+            System.err.println("[SQLException] Something went wrong with the SQL at findAll(): " + sqle.getMessage());
+            return reizigerList;
+        }
     }
 }
