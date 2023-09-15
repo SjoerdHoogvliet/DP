@@ -6,6 +6,7 @@ public class Reiziger {
     private String tussenvoegsel;
     private String achternaam;
     private Date geboortedatum;
+    private Adres adres;
 
     public Reiziger(int id, String voorletters, String tussenvoegsel, String achternaam, Date geboortedatum) {
         this.id = id;
@@ -62,14 +63,23 @@ public class Reiziger {
             return voorletters + ". "  + tussenvoegsel + " " + achternaam;
         }
     }
+
+    public void setAdres(Adres adres){
+        this.adres = adres;
+    }
+
+    public Adres getAdres(){
+        return adres;
+    }
+
     @Override
     public String toString(){
         if(tussenvoegsel == null){
-         return String.format("Reiziger id: %d; %s. %s is geboren op: %s", id, voorletters,
-                 achternaam, geboortedatum);
+         return String.format("Reiziger id: %d; %s. %s is geboren op: %s adres: %s", id, voorletters,
+                 achternaam, geboortedatum, adres);
         }
-        return String.format("Reiziger id: %d; %s. %s %s is geboren op: %s", id,
-            voorletters, tussenvoegsel, achternaam, geboortedatum);
+        return String.format("Reiziger id: %d; %s. %s %s geboren op: %s adres: %s", id,
+            voorletters, tussenvoegsel, achternaam, geboortedatum, adres);
     }
 
 }

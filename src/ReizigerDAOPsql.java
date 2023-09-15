@@ -1,10 +1,11 @@
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.*;
 
 public class ReizigerDAOPsql implements ReizigerDAO{
+//    private Connection conn = Main.connection;
+    private AdresDAO adao = new AdresDAOPsql();
 
     @Override
     public boolean save(Reiziger reiziger) {
@@ -80,6 +81,7 @@ public class ReizigerDAOPsql implements ReizigerDAO{
             }
 
             Reiziger r = new Reiziger(id, voorletters, tussenvoegsel, achternaam, geboortedatum);
+            r.setAdres(adao.findByReiziger(r));
             return r;
         }catch(SQLException sqle){
             System.err.println("[SQLException] Something went wrong with the SQL: " + sqle.getMessage());
@@ -103,6 +105,7 @@ public class ReizigerDAOPsql implements ReizigerDAO{
                 String tussenvoegsel = rs.getString("tussenvoegsel");
                 String achternaam = rs.getString("achternaam");
                 Reiziger r = new Reiziger(id, voorletters, tussenvoegsel, achternaam, Date.valueOf(datum));
+                r.setAdres(adao.findByReiziger(r));
                 reizigerList.add(r);
             }
 
@@ -130,6 +133,7 @@ public class ReizigerDAOPsql implements ReizigerDAO{
                 Date geboortedatum = rs.getDate("geboortedatum");
 
                 Reiziger r = new Reiziger(id, voorletters, tussenvoegsel, achternaam, geboortedatum);
+                r.setAdres(adao.findByReiziger(r));
                 reizigerList.add(r);
             }
 
