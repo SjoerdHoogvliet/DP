@@ -7,4 +7,6 @@ public interface ReizigerDAO {
     public Reiziger findById(int id);
     public List<Reiziger> findByGbdatum(String datum);
     public List<Reiziger> findAll();
+    public void setAdao(AdresDAO adao);
+    public void setOvckdao(OVChipkaartDAO ovckdao);
 }

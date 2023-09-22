@@ -4,7 +4,6 @@ import java.util.List;
 
 public class AdresDAOPsql implements AdresDAO{
 //    private Connection conn = Main.connection;
-    private ReizigerDAO rdao;
 
     @Override
     public boolean save(Adres adres) {
@@ -19,6 +18,8 @@ public class AdresDAOPsql implements AdresDAO{
             pst.setString(5, adres.getWoonplaats());
             pst.setInt(6, adres.getReiziger_id());
             pst.execute();
+            pst.close();
+
             return true;
         }catch(SQLException sqle){
             System.err.println("[SQLException] Something went wrong with the SQL at save: " + sqle.getMessage());
@@ -39,6 +40,8 @@ public class AdresDAOPsql implements AdresDAO{
             pst.setInt(5, adres.getReiziger_id());
             pst.setInt(6,adres.getId());
             pst.execute();
+            pst.close();
+
             return true;
         }catch(SQLException sqle){
             System.err.println("[SQLException] Something went wrong with the SQL at save: " + sqle.getMessage());
@@ -54,6 +57,8 @@ public class AdresDAOPsql implements AdresDAO{
             PreparedStatement pst = Main.connection.prepareStatement(query);
             pst.setInt(1,adres.getId());
             pst.execute();
+            pst.close();
+
             return true;
         }catch(SQLException sqle){
             System.err.println("[SQLException] Something went wrong with the SQL: " + sqle.getMessage());
@@ -81,6 +86,8 @@ public class AdresDAOPsql implements AdresDAO{
                 woonplaats = rs.getString("woonplaats");
                 reiziger_id = rs.getInt("reiziger_id");
             }
+            pst.close();
+            rs.close();
 
             Adres a = new Adres(id, postcode, huisnummer, straat, woonplaats, reiziger_id);
             return a;
@@ -98,6 +105,7 @@ public class AdresDAOPsql implements AdresDAO{
             pst.setInt(1, reiziger.getId());
             ResultSet rs = pst.executeQuery();
 
+
             String postcode = null;
             String huisnummer = null;
             String straat = null;
@@ -110,6 +118,8 @@ public class AdresDAOPsql implements AdresDAO{
                 woonplaats = rs.getString("woonplaats");
                 adres_id = rs.getInt("adres_id");
             }
+            pst.close();
+            rs.close();
             if(postcode == null && huisnummer == null && straat == null && woonplaats == null) {
                 return null;
             }
@@ -142,7 +152,8 @@ public class AdresDAOPsql implements AdresDAO{
                 Adres a = new Adres(id, postcode, huisnummer, straat, woonplaats, reiziger_id);
                 adresList.add(a);
             }
-
+            pst.close();
+            rs.close();
             return adresList;
         }catch(SQLException sqle){
             System.err.println("[SQLException] Something went wrong with the SQL at findAll(): " + sqle.getMessage());

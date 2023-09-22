@@ -7,9 +7,14 @@ public class Main {
         try{
             ReizigerDAO rdao = new ReizigerDAOPsql();
             AdresDAO adao = new AdresDAOPsql();
+            OVChipkaartDAO ovckdao = new OVChipkaartDAOPsql();
+            rdao.setAdao(adao);
+            rdao.setOvckdao(ovckdao);
+
             Main.getConnection();
             Main.testReizigerDAO(rdao);
             Main.testAdresDao(adao, rdao);
+            Main.testOVChipkaartDAO(ovckdao, rdao);
             Main.closeConnection();
         }catch(SQLException sqle){
             System.err.println("[SQLException] Something went wrong with getting the SQL: " + sqle.getMessage());
@@ -98,7 +103,6 @@ public class Main {
         adao.save(adres);
         adressen = adao.findAll();
         System.out.println(adressen.size() + " adressen");
-        exampleReiziger.setAdres(adres);
 
         //Vind het zojuist aangemaakte adres via de id
         int id = 77;
@@ -110,11 +114,10 @@ public class Main {
         Adres exampleAdres = new Adres(77, "1234BC", "2", "Laanstraat", "Nieuw-Urk", 77);
         adao.update(exampleAdres);
         Adres updatedAdres = adao.findById(id);
-        System.out.println("na ReizigerDAO.update(): " + updatedAdres.toString());
-        exampleReiziger.setAdres(updatedAdres);
+        System.out.println("na AdresDAO.update(): " + updatedAdres.toString());
 
         //Vind het nieuwe adres dmv de reiziger
-        System.out.println(String.format("[TEST] We zoeken naar het adres van reiziger %s en vinden:", exampleReiziger));
+        System.out.println(String.format("[TEST] We zoeken naar het adres van reiziger %s en vinden:", rdao.findById(exampleReiziger.getId())));
         Adres foundByReiziger = adao.findByReiziger(exampleReiziger);
         System.out.println(foundByReiziger.toString());
 
@@ -126,6 +129,49 @@ public class Main {
 
         //Verwijder ten slotte ook de voorbeeldreiziger
         rdao.delete(exampleReiziger);
+    }
 
+    private static void testOVChipkaartDAO(OVChipkaartDAO ovckdao, ReizigerDAO rdao){
+        System.out.println("\n---------- Test OVChipkaartDAO -------------");
+
+        //Maak een voorbeeldreiziger om onze kaarten aan te koppelen
+        Reiziger exampleReiziger = new Reiziger(77, "A", "", "Broers", Date.valueOf("1971-12-03"));
+        rdao.save(exampleReiziger);
+
+        //Haal alle chipkaarten uit de database
+        System.out.println("[TEST] Alle OV Chipkaarten:");
+        for(OVChipkaart k : ovckdao.findAll()){
+            System.out.println(k.toString());
+        }
+
+        //Maak een nieuwe OV Chipkaart aan en sla deze op
+        OVChipkaart kaart1 = new OVChipkaart(12345, Date.valueOf("2024-01-01"), 2, 20.50, 77);
+        System.out.print("[Test] Eerst " + ovckdao.findAll().size() + " OV Chipkaarten, na OVChipkaartDAO.save() ");
+        ovckdao.save(kaart1);
+        System.out.println(ovckdao.findAll().size() + " OV Chipkaarten");
+
+        //Update de nieuwe OV Chipkaart
+        OVChipkaart kaart1Nieuw = new OVChipkaart(12345, Date.valueOf("2026-01-01"), 2, 24.50, 77);
+        System.out.println("[TEST] Eerst " + ovckdao.findByReiziger(exampleReiziger).toString());
+        ovckdao.update(kaart1Nieuw);
+        System.out.println("daarna: " + ovckdao.findByReiziger(exampleReiziger).toString());
+
+        //Vind de zojuist aangemaakte kaart op basis van de reiziger (met 1 kaart)
+        System.out.println("[TEST] We zoeken naar de chipkaarten van reiziger met id " + exampleReiziger.getId());
+        for(OVChipkaart k : ovckdao.findByReiziger(exampleReiziger)){
+            System.out.println(k.toString());
+        }
+
+        //Vind de zojuist aangemaakte kaarten op basis van de reiziger (met meerdere kaarten)
+        OVChipkaart kaart2 = new OVChipkaart(23456, Date.valueOf("2025-01-01"), 1, 50.25, 77);
+        ovckdao.save(kaart2);
+        System.out.println("[TEST] We zoeken naar de chipkaarten van reiziger met id " + exampleReiziger.getId());
+        for(OVChipkaart k : ovckdao.findByReiziger(exampleReiziger)){
+            System.out.println(k.toString());
+        }
+
+        //Verwijder de nieuwe kaarten
+        ovckdao.delete(kaart1Nieuw);
+        ovckdao.delete(kaart2);
     }
 }

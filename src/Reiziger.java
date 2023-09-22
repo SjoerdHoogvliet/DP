@@ -1,4 +1,5 @@
 import java.sql.Date;
+import java.util.List;
 
 public class Reiziger {
     private int id;
@@ -7,6 +8,7 @@ public class Reiziger {
     private String achternaam;
     private Date geboortedatum;
     private Adres adres;
+    private List<OVChipkaart> ovChipKaarten;
 
     public Reiziger(int id, String voorletters, String tussenvoegsel, String achternaam, Date geboortedatum) {
         this.id = id;
@@ -70,6 +72,13 @@ public class Reiziger {
 
     public Adres getAdres(){
         return adres;
+    }
+    public void addOVChipkaart(OVChipkaart ovChipkaart){
+        ovChipKaarten.add(ovChipkaart);
+    }
+
+    public List<OVChipkaart> getOvChipKaarten(){
+        return ovChipKaarten;
     }
 
     @Override
