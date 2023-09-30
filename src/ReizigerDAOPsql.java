@@ -52,7 +52,7 @@ public class ReizigerDAOPsql implements ReizigerDAO{
             pst.close();
 
             if(this.adao != null && reiziger.getAdres() != null){
-                this.adao.save(reiziger.getAdres());
+                this.adao.update(reiziger.getAdres());
             }
             if(this.ovckdao != null && reiziger.getOvChipKaarten() != null){
                 for (OVChipkaart ovChipkaart: reiziger.getOvChipKaarten()){
@@ -69,21 +69,21 @@ public class ReizigerDAOPsql implements ReizigerDAO{
     @Override
     public boolean delete(Reiziger reiziger) {
         try{
-            String query = "DELETE FROM reiziger WHERE reiziger_id=?";
-
-            PreparedStatement pst = Main.connection.prepareStatement(query);
-            pst.setInt(1,reiziger.getId());
-            pst.execute();
-            pst.close();
-
             if(this.adao != null && reiziger.getAdres() != null){
-                this.adao.save(reiziger.getAdres());
+                this.adao.delete(reiziger.getAdres());
             }
             if(this.ovckdao != null && reiziger.getOvChipKaarten() != null){
                 for (OVChipkaart ovChipkaart: reiziger.getOvChipKaarten()){
                     ovckdao.delete(ovChipkaart);
                 }
             }
+
+            String query = "DELETE FROM reiziger WHERE reiziger_id=?";
+
+            PreparedStatement pst = Main.connection.prepareStatement(query);
+            pst.setInt(1,reiziger.getId());
+            pst.execute();
+            pst.close();
             return true;
         }catch(SQLException sqle){
             System.err.println("[SQLException] Something went wrong with the SQL at Delete: " + sqle.getMessage());
