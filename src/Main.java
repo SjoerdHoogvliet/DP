@@ -8,16 +8,19 @@ public class Main {
             ReizigerDAO rdao = new ReizigerDAOPsql();
             AdresDAO adao = new AdresDAOPsql();
             OVChipkaartDAO ovckdao = new OVChipkaartDAOPsql();
+            ProductDAO pdao = new ProductDAOPsql();
             rdao.setAdao(adao);
             rdao.setOvckdao(ovckdao);
+            pdao.setOvckdao(ovckdao);
 
             Main.getConnection();
-            Main.testReizigerDAO(rdao);
-            Main.testAdresDao(adao, rdao);
-            Main.testOVChipkaartDAO(ovckdao, rdao);
+//            Main.testReizigerDAO(rdao);
+//            Main.testAdresDao(adao, rdao);
+//            Main.testOVChipkaartDAO(ovckdao, rdao);
+            Main.testProductDAO(pdao, ovckdao, rdao);
             Main.closeConnection();
         }catch(SQLException sqle){
-            System.err.println("[SQLException] Something went wrong with getting the SQL: " + sqle.getMessage());
+            System.err.println("[SQLException] There was an exception in one of the test blocks: " + sqle.getMessage());
         }
     }
     private static void getConnection() {
@@ -131,7 +134,7 @@ public class Main {
         rdao.delete(exampleReiziger);
     }
 
-    private static void testOVChipkaartDAO(OVChipkaartDAO ovckdao, ReizigerDAO rdao){
+    private static void testOVChipkaartDAO(OVChipkaartDAO ovckdao, ReizigerDAO rdao) throws SQLException{
         System.out.println("\n---------- Test OVChipkaartDAO -------------");
 
         //Maak een voorbeeldreiziger om onze kaarten aan te koppelen
@@ -173,5 +176,47 @@ public class Main {
         //Verwijder de nieuwe kaarten
         ovckdao.delete(kaart1Nieuw);
         ovckdao.delete(kaart2);
+
+        //Verwijder tenslotte de aangemaakte reiziger
+        rdao.delete(exampleReiziger);
+    }
+
+    private static void testProductDAO(ProductDAO pdao, OVChipkaartDAO ovckdao,ReizigerDAO rdao) throws SQLException{
+        System.out.println("\n---------- Test ProductDAO -------------");
+
+        //Maak een testreiziger aan, hieraan kunnen we de OV-chipkaart koppelen waaraan de producten gekoppeld worden
+        Reiziger exampleReiziger = new Reiziger(77, "A", "", "Broers", Date.valueOf("1971-12-03"));
+        rdao.save(exampleReiziger);
+
+        //Maak een test OV-Chipkaart
+        OVChipkaart kaart1 = new OVChipkaart(12345, Date.valueOf("2024-01-01"), 2, 20.50, 77);
+        kaart1.setReiziger(exampleReiziger);
+        ovckdao.save(kaart1);
+
+        //Maak een nieuw product, zet dit op OV-Chipkaart 12345 en sla dit op
+        Product testP1 = new Product(56789, "Reisproduct", "Product voor reizen", 12.50);
+        kaart1.addProduct(testP1);
+        System.out.print("[TEST]Eerst " + pdao.findAll().size() + " producten, ");
+        pdao.save(testP1);
+        System.out.println("na pdao.save() " + pdao.findAll().size() + " producten.");
+
+        //Zoek nu ons product op basis van de OV-Chipkaart
+        System.out.println("[TEST]Zoeken op OV-Chipkaart " + kaart1 + " geeft:");
+        System.out.println(pdao.findByOVChipkaart(kaart1));
+
+        //Test de update van product
+        testP1.setBeschrijving("Voor reizen bedoeld product");
+        System.out.print("[TEST]Update product: " + pdao.findByOVChipkaart(kaart1));
+        pdao.update(testP1);
+        System.out.println(" na update: " + pdao.findByOVChipkaart(kaart1));
+
+        //Delete nu het product
+        System.out.print("[TEST]Eerst " + pdao.findAll().size() + " producten, ");
+        pdao.delete(testP1);
+        System.out.println("na pdao.delete() " + pdao.findAll().size() + " producten.");
+
+        //Verwijder tenslotte de test OV-Chipkaart en reiziger
+        ovckdao.delete(kaart1);
+        rdao.delete(exampleReiziger);
     }
 }

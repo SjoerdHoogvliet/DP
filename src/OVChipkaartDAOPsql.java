@@ -10,7 +10,7 @@ public class OVChipkaartDAOPsql implements  OVChipkaartDAO{
     @Override
     public boolean save(OVChipkaart ovChipkaart) {
         try{
-            String query = "INSERT INTO ov_chipkaart(kaart_nummer, geldig_tot, klasse, saldo, reiziger_id, ov_chipkaart_reiziger_id_fkey) VALUES (?, ?, ?, ?, ?, ?);";
+            String query = "INSERT INTO ov_chipkaart(kaart_nummer, geldig_tot, klasse, saldo, reiziger_id) VALUES (?, ?, ?, ?, ?);";
 
             PreparedStatement pst = Main.connection.prepareStatement(query);
             pst.setInt(1, ovChipkaart.getKaartNummer());
@@ -18,7 +18,7 @@ public class OVChipkaartDAOPsql implements  OVChipkaartDAO{
             pst.setInt(3, ovChipkaart.getKlasse());
             pst.setDouble(4, ovChipkaart.getSaldo());
             pst.setInt(5, ovChipkaart.getReiziger_id());
-            pst.setInt(6, ovChipkaart.getReiziger().getId());
+            //pst.setInt(6, ovChipkaart.getReiziger().getId());
             pst.execute();
             pst.close();
 
